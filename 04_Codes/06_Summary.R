@@ -65,11 +65,11 @@ market5 <- proj.price %>%
   mutate(market = "GLP-1")
 
 market6 <- proj.price %>% 
-  filter(stri_sub(atc4, 1, 4) %in% c("A10C", "A10D0")) %>% 
+  filter(stri_sub(atc4, 1, 4) %in% c("A10C") | atc4 %in% c("A10D0")) %>% 
   mutate(market = "Insulin Market")
 
 market7 <- proj.price %>% 
-  filter(stri_sub(atc4, 1, 4) %in% c("A10C", "A10D0")) %>% 
+  filter(stri_sub(atc4, 1, 4) %in% c("A10C") | atc4 %in% c("A10D0")) %>% 
   mutate(market = "Insulin Type")
 
 market8 <- proj.price %>% 
@@ -103,15 +103,7 @@ colnames(history.raw) <-
 
 # update market
 history.lantus.chc <- history.raw %>% 
-  group_by(Channel, YM, `CORPORATE DESC`, `MANUF.TYPE DESC`, `MANUFACT. DESC`, 
-           `APP FORM 1 SHORT DESC`, `APP FORM 1 DESC`, `TC I SHORT DESC`, 
-           `TC I DESC`, `TC II SHORT DESC`, `TC II DESC`, `TC III SHORT DESC`, 
-           `TC III DESC`, `TC IV SHORT DESC`, `ATC IV DESC`, `COMPS ABBR`, 
-           `COMPS DESC`, `PRODUCT SHORT DESC`, `PRODUCT DESC`, `PACK SHORT DESC`, 
-           `PACK DESC`, PACK, Measurement) %>% 
-  summarise(Unit = first(Unit)) %>% 
-  ungroup() %>% 
-  filter(`TC IV SHORT DESC` %in% c('A10C2', 'A10C3', 'A10C5')) %>% 
+  filter(Market %in% c('Basal market', 'Premix')) %>% 
   mutate(Market = 'Basal+Premix') %>% 
   bind_rows(history.raw)
 
@@ -128,8 +120,9 @@ lantus.chc <- total.market %>%
   left_join(dosage.info, by = c("PACK" = "PACK_CODE")) %>% 
   mutate(Channel = "CHC",
          `Value(RMB)` = round(`Value(RMB)`, 2),
-         `Volume(Dosage unit)` = round(units * PACK_SIZE),
-         `T day` = round(`Volume(Dosage unit)` / DOSAGE)) %>% 
+         `Volume(Dosage unit)` = units * PACK_SIZE,
+         `T day` = round(`Volume(Dosage unit)` / DOSAGE), 
+         `Volume(Dosage unit)` = round(`Volume(Dosage unit)`)) %>% 
   pivot_longer(cols = c(`Value(RMB)`, `Volume(Dosage unit)`, `T day`), 
                names_to = 'Measurement', 
                values_to = 'Unit', 
@@ -143,7 +136,8 @@ lantus.chc <- total.market %>%
   bind_rows(history.lantus.chc[history.lantus.chc$YM != '2020Q1', ]) %>% 
   pivot_wider(names_from = 'Measurement', values_from = 'Unit') %>% 
   left_join(dosage.info, by = c("PACK" = "PACK_CODE")) %>% 
-  mutate(`T day` = round(`Volume(Dosage unit)` / DOSAGE)) %>% 
+  mutate(`T day` = round(`Volume(Dosage unit)` / DOSAGE), 
+         `Volume(Dosage unit)` = round(`Volume(Dosage unit)`)) %>% 
   pivot_longer(cols = c(`Value(RMB)`, `Volume(Dosage unit)`, `T day`), 
                names_to = 'Measurement', 
                values_to = 'Unit', 
@@ -180,8 +174,9 @@ lantus.chc1 <- total.market %>%
   left_join(dosage.info, by = c("PACK" = "PACK_CODE")) %>% 
   mutate(Channel = "CHC",
          `Value(RMB)` = round(`Value(RMB)`, 2),
-         `Volume(Dosage unit)` = round(units * PACK_SIZE),
-         `T day` = round(`Volume(Dosage unit)` / DOSAGE)) %>% 
+         `Volume(Dosage unit)` = units * PACK_SIZE,
+         `T day` = round(`Volume(Dosage unit)` / DOSAGE), 
+         `Volume(Dosage unit)` = round(`Volume(Dosage unit)`)) %>% 
   pivot_longer(cols = c(`Value(RMB)`, `Volume(Dosage unit)`, `T day`), 
                names_to = 'Measurement', 
                values_to = 'Unit', 
@@ -195,7 +190,8 @@ lantus.chc1 <- total.market %>%
   bind_rows(history.lantus.chc) %>% 
   pivot_wider(names_from = 'Measurement', values_from = 'Unit') %>% 
   left_join(dosage.info, by = c("PACK" = "PACK_CODE")) %>% 
-  mutate(`T day` = round(`Volume(Dosage unit)` / DOSAGE)) %>% 
+  mutate(`T day` = round(`Volume(Dosage unit)` / DOSAGE), 
+         `Volume(Dosage unit)` = round(`Volume(Dosage unit)`)) %>% 
   pivot_longer(cols = c(`Value(RMB)`, `Volume(Dosage unit)`, `T day`), 
                names_to = 'Measurement', 
                values_to = 'Unit', 
