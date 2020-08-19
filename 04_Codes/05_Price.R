@@ -76,9 +76,8 @@ proj.price <- proj.universe %>%
          price = ifelse(is.na(price), price_city, price),
          price = ifelse(is.na(price), price_prov, price),
          price = ifelse(is.na(price), price_pack, price)) %>% 
-  mutate(units = sales / price,
-         units = ifelse(units <= 0, 0, units)) %>% 
-  filter(!is.na(price), !is.na(sales)) %>% 
+  mutate(units = sales / price) %>% 
+  filter(units > 0, sales > 0, price > 0) %>% 
   select(year, month, quarter, province, city, atc4, nfc, 
          molecule, product, packid, units, sales, price)
 

@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # ProjectName:  Sanofi CMAX
-# Purpose:      Lantus CHC
+# Purpose:      Readin Raw Data
 # programmer:   Zhe Liu
 # Date:         2020-08-12
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -25,8 +25,8 @@ pchc.mapping2 <- pchc.universe %>%
 pchc.mapping3 <- bind_rows(pchc.mapping1, pchc.mapping2) %>% 
   distinct(province, city, district, hospital, pchc)
 
-pchc.mapping4 <- pchc.mapping1 %>% 
-  group_by(pchc = pchc1) %>% 
+pchc.mapping4 <- pchc.mapping3 %>% 
+  group_by(pchc) %>% 
   summarise(province = first(na.omit(province)),
             city = first(na.omit(city)),
             district = first(na.omit(district))) %>% 
