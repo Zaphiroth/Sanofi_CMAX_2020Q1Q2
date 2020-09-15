@@ -28,3 +28,66 @@ check.old <- history.raw %>%
 
 
 
+year  province     sales
+<chr> <chr>        <dbl>
+  1 2019  安徽       311263.
+2 2019  北京     21312717.
+3 2019  福建     11377274.
+4 2019  广东       231811.
+5 2019  江苏     18041260.
+6 2019  山东      1964121.
+7 2019  浙江     19339404 
+
+
+chk <- raw.total %>% 
+  filter(product == 'LANTUS             AVS') %>% 
+  group_by(year, province) %>% 
+  summarise(sales = sum(sales)) %>% 
+  ungroup() %>% 
+  mutate(sales_19 = c(311263, 21312717, 11377274, 231811, 18041260, 1964121, 19339404)) %>% 
+  mutate(growth = sales / sales_19 - 1)
+
+
+(501796+31649855+11858163+360957+27634749+ 13813179) / (311263+ 21312717+ 11377274+ 231811+ 18041260+ 19339404)
+
+
+
+
+
+sanofi.history <- read.xlsx('02_Inputs/data/Sanofi_Lantus_CHC_Sample.xlsx')
+
+chk <- sanofi.history %>% 
+  filter(market == 'Basal market') %>% 
+  bind_rows(raw.total) %>% 
+  filter(product == 'LANTUS             AVS', 
+         quarter %in% c('2019Q1', '2019Q2', '2020Q1', '2020Q2')) %>% 
+  group_by(year, quarter, province, city, product, packid) %>% 
+  summarise(units = sum(units, na.rm = TRUE), 
+            sales = sum(sales, na.rm = TRUE)) %>% 
+  ungroup()
+
+write.xlsx(chk, '05_Internal_Review/Sanofi_Lantus_CHC_Raw_Check.xlsx')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
