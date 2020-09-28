@@ -46,9 +46,9 @@ proj.market.sample <- raw.total %>%
 
 # universe PCHC set
 universe.set <- proj.market.sample %>% 
-  distinct(year, quarter, month, province, city, district, 
+  distinct(year, quarter, month, province, city, 
            atc4, nfc, molecule, product, packid) %>% 
-  left_join(universe.pchc, by = c("province", "city", "district")) %>% 
+  left_join(universe.pchc, by = c("province", "city")) %>% 
   mutate(seg_city = if_else(city == "上海", stri_paste(city, district), city)) %>% 
   left_join(proj.segment, by = "seg_city") %>% 
   left_join(proj.market.sample, by = c("year", "month", "quarter", "province", 
@@ -76,13 +76,12 @@ proj.sample <- universe.set %>%
          predict_sales = if_else(predict_sales < 0, 0, predict_sales),
          final_sales = if_else(is.na(sales), predict_sales, sales)) %>% 
   filter(final_sales > 0) %>% 
-  group_by(year, month, quarter, province, city, atc4, nfc, molecule, 
+  group_by(year, month, quarter, province, city, district, atc4, nfc, molecule, 
            product, packid) %>% 
   summarise(sales = sum(final_sales, na.rm = TRUE)) %>% 
   ungroup() %>% 
-  select(year, month, quarter, province, city, atc4, nfc, molecule, 
+  select(year, month, quarter, province, city, district, atc4, nfc, molecule, 
          product, packid, sales)
 
-write.xlsx(proj.sample, "03_Outputs/03_Projection_of_Sample_Cities.xlsx")
 
 

@@ -160,7 +160,7 @@ lantus.chc <- total.market %>%
          `PACK SHORT DESC`, `PACK DESC`, PACK, Measurement, Unit) %>% 
   arrange(YM, Market, PACK, Measurement)
 
-write.xlsx(lantus.chc, "03_Outputs/06_Sanofi_Lantus_CHC_Projection_2017Q1_2020Q2_v2.xlsx")
+write.xlsx(lantus.chc, "03_Outputs/06_Sanofi_Lantus_CHC_Projection_2017Q1_2020Q2_v3.xlsx")
 
 # update 2020Q2
 lantus.chc1 <- total.market %>% 
@@ -214,8 +214,66 @@ lantus.chc1 <- total.market %>%
          `PACK SHORT DESC`, `PACK DESC`, PACK, Measurement, Unit) %>% 
   arrange(YM, Market, PACK, Measurement)
 
-write.xlsx(lantus.chc1, "03_Outputs/06_Sanofi_Lantus_CHC_Projection_2017Q1_2020Q2_m_v2.xlsx")
+write.xlsx(lantus.chc1, "03_Outputs/06_Sanofi_Lantus_CHC_Projection_2017Q1_2020Q2_m_v3.xlsx")
 
 
 # lantus.chc %>% group_by(YM) %>% summarise(unit = sum(Unit))
+
+
+lantus.chc.city <- total.market %>% 
+  group_by(YM = quarter, Market = market, province, city, PACK = packid) %>% 
+  summarise(`Value(RMB)` = sum(sales, na.rm = TRUE),
+            units = sum(units, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  left_join(product.info, by = "PACK") %>% 
+  left_join(pack.info, by = c("PACK" = "PACK_ID")) %>% 
+  left_join(dosage.info, by = c("PACK" = "PACK_CODE")) %>% 
+  mutate(Channel = "CHC",
+         `Value(RMB)` = round(`Value(RMB)`, 2),
+         `Volume(Dosage unit)` = units * PACK_SIZE,
+         `T day` = round(`Volume(Dosage unit)` / DOSAGE), 
+         `Volume(Dosage unit)` = round(`Volume(Dosage unit)`)) %>% 
+  pivot_longer(cols = c(`Value(RMB)`, `Volume(Dosage unit)`, `T day`), 
+               names_to = 'Measurement', 
+               values_to = 'Unit', 
+               values_drop_na = FALSE) %>% 
+  select(Channel, Market, YM, province, city, `CORPORATE DESC`, `MANUF.TYPE DESC`, `MANUFACT. DESC`, 
+         `APP FORM 1 SHORT DESC`, `APP FORM 1 DESC`, `TC I SHORT DESC`, 
+         `TC I DESC`, `TC II SHORT DESC`, `TC II DESC`, `TC III SHORT DESC`, 
+         `TC III DESC`, `TC IV SHORT DESC`, `ATC IV DESC`, `COMPS ABBR`, 
+         `COMPS DESC`, `PRODUCT SHORT DESC`, `PRODUCT DESC`, `PACK SHORT DESC`, 
+         `PACK DESC`, PACK, Measurement, Unit) %>% 
+  pivot_wider(names_from = 'Measurement', values_from = 'Unit') %>% 
+  left_join(dosage.info, by = c("PACK" = "PACK_CODE")) %>% 
+  mutate(`T day` = round(`Volume(Dosage unit)` / DOSAGE), 
+         `Volume(Dosage unit)` = round(`Volume(Dosage unit)`)) %>% 
+  pivot_longer(cols = c(`Value(RMB)`, `Volume(Dosage unit)`, `T day`), 
+               names_to = 'Measurement', 
+               values_to = 'Unit', 
+               values_drop_na = FALSE) %>% 
+  mutate(Measurement = factor(Measurement, 
+                              levels = c('Value(RMB)', 'Volume(Dosage unit)', 'T day')), 
+         Category = case_when(
+           `TC IV SHORT DESC` %in% c('A10C1') ~ 'Rapid', 
+           `TC IV SHORT DESC` %in% c('A10C2', 'A10C4', 'A10C5') ~ 'Basal', 
+           `TC IV SHORT DESC` %in% c('A10C3') ~ 'Premix', 
+           `TC IV SHORT DESC` %in% c('A10D0') ~ 'Animal', 
+           `TC IV SHORT DESC` %in% c('A10S0') ~ 'GLP-1', 
+           TRUE ~ NA_character_
+         )) %>% 
+  select(Channel, Market, Category, YM, province, city, `CORPORATE DESC`, `MANUF.TYPE DESC`, 
+         `MANUFACT. DESC`, `APP FORM 1 SHORT DESC`, `APP FORM 1 DESC`, 
+         `TC I SHORT DESC`, `TC I DESC`, `TC II SHORT DESC`, `TC II DESC`, 
+         `TC III SHORT DESC`, `TC III DESC`, `TC IV SHORT DESC`, `ATC IV DESC`, 
+         `COMPS ABBR`, `COMPS DESC`, `PRODUCT SHORT DESC`, `PRODUCT DESC`, 
+         `PACK SHORT DESC`, `PACK DESC`, PACK, Measurement, Unit) %>% 
+  arrange(YM, Market, PACK, Measurement)
+
+write.xlsx(lantus.chc.city, "03_Outputs/Sanofi_Lantus_CHC_Province.xlsx")
+
+
+
+
+
+
 

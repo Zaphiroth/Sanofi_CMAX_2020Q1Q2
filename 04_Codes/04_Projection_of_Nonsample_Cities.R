@@ -33,7 +33,7 @@ universe.city <- pchc.universe %>%
   ungroup()
 
 # universe district
-proj.market.nation <- proj.sample %>% 
+proj.market.nation <- proj.sample.m %>% 
   left_join(city.tier, by = "city") %>% 
   mutate(tier = ifelse(is.na(tier), 1, tier)) %>% 
   group_by(year, month, quarter, province, city, tier, atc4, nfc, molecule, 
@@ -81,7 +81,7 @@ proj.universe <- proj.region.list %>%
   mutate(flag = 1) %>% 
   select(year, month, quarter, province, city, atc4, nfc, molecule, 
          product, packid, sales = final_sales, flag) %>% 
-  bind_rows(proj.sample)
+  bind_rows(proj.sample.m)
 
 write.xlsx(proj.universe, "03_Outputs/04_Universe_Projection.xlsx")
 
